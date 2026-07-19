@@ -1,1 +1,1656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>60-Day Mission Log</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap');
 
+:root {
+  --bg: #0d0d0d;
+  --surface: #141414;
+  --surface2: #1c1c1c;
+  --border: #2a2a2a;
+  --border2: #333;
+  --text: #e8e8e8;
+  --muted: #666;
+  --muted2: #444;
+  --red: #c0392b;
+  --red-dim: #7a1f18;
+  --red-glow: rgba(192,57,43,0.15);
+  --green: #27ae60;
+  --yellow: #f39c12;
+  --mono: 'Share Tech Mono', monospace;
+  --cond: 'Barlow Condensed', sans-serif;
+  --body: 'Barlow', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); }
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--red);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mission-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--red);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.mission-title {
+  font-family: var(--cond);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+
+
+/* ── NAV TABS ── */
+.nav-tabs {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 0;
+  padding: 0 24px;
+  overflow-x: auto;
+}
+
+.nav-tab {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 20px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+/* ── VIEWS ── */
+.view { display: none; padding: 28px 24px; max-width: 1100px; margin: 0 auto; }
+.view.active { display: block; }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 6px;
+}
+
+.section-title {
+  font-family: var(--cond);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+/* ── STREAK ROW ── */
+.streak-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  margin-bottom: 28px;
+}
+
+.streak-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px 16px;
+}
+
+.streak-num {
+  font-family: var(--cond);
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--red);
+  margin-bottom: 4px;
+}
+
+.streak-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── DAILY LOG FORM ── */
+.log-date-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.log-date-text {
+  font-family: var(--cond);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.day-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+
+.log-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+
+.log-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px;
+}
+
+.log-block-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.log-block-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── WORKOUT CHECKS ── */
+.workout-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+
+.workout-item:last-child { border-bottom: none; }
+
+.custom-check {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--border2);
+  background: transparent;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.15s;
+}
+
+.workout-item.checked .custom-check {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.workout-item.checked .custom-check::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.workout-name {
+  font-family: var(--cond);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  flex: 1;
+}
+
+.workout-item.checked .workout-name {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--red-dim);
+}
+
+.workout-reps {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--red);
+}
+
+/* ── NUTRITION INPUTS ── */
+.nut-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.nut-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  min-width: 70px;
+  padding-top: 9px;
+}
+
+.log-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+  resize: vertical;
+  min-height: 36px;
+  width: 100%;
+}
+
+.log-input:focus { border-color: var(--red); }
+
+.macros-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.macro-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.macro-input-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── PHOTO UPLOAD ── */
+.photo-upload-zone {
+  border: 1.5px dashed var(--border2);
+  background: var(--surface2);
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.photo-upload-zone:hover { border-color: var(--red); }
+.photo-upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.photo-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.photo-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.photo-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  display: none;
+}
+
+/* ── STATUS BAR ── */
+.status-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.complete-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.complete-toggle-check {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--muted2);
+  position: relative;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.complete-toggle.done .complete-toggle-check {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.complete-toggle.done .complete-toggle-check::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.complete-label {
+  font-family: var(--cond);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.save-btn {
+  background: var(--red);
+  color: white;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 24px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.save-btn:hover { background: #a93226; }
+.save-btn:active { background: var(--red-dim); }
+
+.save-confirm {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--green);
+  letter-spacing: 2px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.save-confirm.show { opacity: 1; }
+
+/* ── PROGRESS TABLE ── */
+.progress-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+
+.progress-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.progress-table th {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: 1px solid var(--red);
+  padding: 10px 12px;
+  text-align: left;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 400;
+  position: sticky;
+  top: 0;
+}
+
+.progress-table td {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.progress-table tr:nth-child(even) td { background: var(--surface); }
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.dot-green { background: var(--green); }
+.dot-yellow { background: var(--yellow); }
+.dot-gray { background: var(--muted2); }
+
+.progress-table td.td-notes {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ── CALENDAR ── */
+.calendar-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.cal-month-label {
+  font-family: var(--cond);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.cal-nav-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.cal-nav-btn:hover { border-color: var(--red); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-day-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  padding: 8px 4px;
+}
+
+.cal-day {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 10px 6px;
+  min-height: 60px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cal-day:hover { border-color: var(--red); }
+.cal-day.empty { background: transparent; border-color: transparent; cursor: default; }
+.cal-day.today { border-color: var(--red); }
+
+.cal-day-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cal-day.today .cal-day-num { color: var(--red); }
+
+.cal-status-circle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: auto;
+}
+
+.cal-mission-day {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--muted2);
+  letter-spacing: 1px;
+}
+
+/* ── END REPORT ── */
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-bottom: 28px;
+}
+
+.report-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px 16px;
+}
+
+.report-num {
+  font-family: var(--cond);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--red);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.report-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.photo-compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-bottom: 28px;
+}
+
+.photo-compare-slot {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.photo-compare-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.photo-compare-img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+/* ── FULL-SCREEN LOG MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 500;
+  display: none;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+
+.modal-box {
+  background: var(--bg);
+  border: 1px solid var(--red);
+  width: 100%;
+  max-width: 700px;
+  padding: 28px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  font-family: var(--cond);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.modal-close {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.modal-close:hover { border-color: var(--red); color: var(--text); }
+
+/* ── MISC ── */
+.full-log-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 2px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.progress-bar-wrap {
+  background: var(--surface2);
+  height: 4px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.progress-bar-fill {
+  background: var(--red);
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+textarea.log-input { min-height: 80px; }
+
+@media (max-width: 640px) {
+  .log-grid { grid-template-columns: 1fr; }
+  .streak-row { grid-template-columns: repeat(2, 1fr); }
+  .report-grid { grid-template-columns: repeat(2, 1fr); }
+  .photo-compare-grid { grid-template-columns: 1fr; }
+  .macros-row { grid-template-columns: 1fr 1fr; }
+  .cal-day { min-height: 44px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="mission-badge">Mission Log</span>
+    <span class="mission-title">60-Day Fighter</span>
+  </div>
+  <div class="topbar-right">
+    
+  </div>
+</div>
+
+<!-- ── NAV TABS ── -->
+<div class="nav-tabs">
+  <button class="nav-tab active" data-view="today">Today</button>
+  <button class="nav-tab" data-view="calendar">Calendar</button>
+  <button class="nav-tab" data-view="log">Log</button>
+  <button class="nav-tab" data-view="report">Report</button>
+</div>
+
+<!-- ════════════ TODAY ════════════ -->
+<div class="view active" id="view-today">
+
+  <!-- Streaks -->
+  <div class="streak-row">
+    <div class="streak-card">
+      <div class="streak-num" id="streakCurrent">0</div>
+      <div class="streak-label">Current Streak</div>
+    </div>
+    <div class="streak-card">
+      <div class="streak-num" id="streakLongest">0</div>
+      <div class="streak-label">Longest Streak</div>
+    </div>
+    <div class="streak-card">
+      <div class="streak-num" id="streakDone">0</div>
+      <div class="streak-label">Days Complete</div>
+    </div>
+    <div class="streak-card">
+      <div class="streak-num" id="streakLeft">60</div>
+      <div class="streak-label">Days Remaining</div>
+    </div>
+  </div>
+
+  <!-- Mission Day / Date -->
+  <div class="log-date-header">
+    <div>
+      <div class="log-date-text" id="todayDateLabel">—</div>
+      <div class="progress-bar-wrap" style="margin-top:6px; width:200px;">
+        <div class="progress-bar-fill" id="missionProgressBar" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="day-badge" id="missionDayBadge">DAY — / 60</div>
+  </div>
+
+  <!-- Workout + Nutrition grid -->
+  <div class="log-grid">
+
+    <!-- Workout -->
+    <div class="log-block">
+      <div class="log-block-title">Workout</div>
+      <div id="workoutChecks">
+        <div class="workout-item" data-key="pushups">
+          <div class="custom-check"></div>
+          <div class="workout-name">Push-ups</div>
+          <div class="workout-reps">1,000</div>
+        </div>
+        <div class="workout-item" data-key="pullups">
+          <div class="custom-check"></div>
+          <div class="workout-name">Pull-ups</div>
+          <div class="workout-reps">1,000</div>
+        </div>
+        <div class="workout-item" data-key="squats">
+          <div class="custom-check"></div>
+          <div class="workout-name">Squats</div>
+          <div class="workout-reps">1,000</div>
+        </div>
+        <div class="workout-item" data-key="situps">
+          <div class="custom-check"></div>
+          <div class="workout-name">Sit-ups / L-Sits</div>
+          <div class="workout-reps">1,000</div>
+        </div>
+      </div>
+      <!-- Add Workout -->
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div id="customWorkouts"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;" id="addWorkoutRow">
+          <input type="text" id="newWorkoutName" class="log-input" placeholder="New workout name..." style="min-height:auto;resize:none;flex:1;">
+          <button onclick="addCustomWorkout()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:8px 14px;cursor:pointer;white-space:nowrap;text-transform:uppercase;">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nutrition -->
+    <div class="log-block">
+      <div class="log-block-title">Nutrition</div>
+
+      <div class="nut-row">
+        <div class="nut-label">Breakfast</div>
+        <textarea class="log-input" id="inp-breakfast" rows="2" placeholder="What you ate..."></textarea>
+      </div>
+      <div class="nut-row">
+        <div class="nut-label">Lunch</div>
+        <textarea class="log-input" id="inp-lunch" rows="2" placeholder="What you ate..."></textarea>
+      </div>
+      <div class="nut-row">
+        <div class="nut-label">Dinner</div>
+        <textarea class="log-input" id="inp-dinner" rows="2" placeholder="What you ate..."></textarea>
+      </div>
+      <div class="nut-row">
+        <div class="nut-label">Snacks</div>
+        <textarea class="log-input" id="inp-snacks" rows="1" placeholder="Optional..."></textarea>
+      </div>
+
+      <div class="macros-row">
+        <div class="macro-input-wrap">
+          <div class="macro-input-label">Calories</div>
+          <input type="number" class="log-input" id="inp-calories" placeholder="kcal" style="min-height:auto;resize:none;">
+        </div>
+        <div class="macro-input-wrap">
+          <div class="macro-input-label">Protein</div>
+          <input type="number" class="log-input" id="inp-protein" placeholder="grams" style="min-height:auto;resize:none;">
+        </div>
+        <div class="macro-input-wrap">
+          <div class="macro-input-label">Water</div>
+          <input type="text" class="log-input" id="inp-water" placeholder="oz / L" style="min-height:auto;resize:none;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo + Notes grid -->
+  <div class="log-grid">
+    <div class="log-block">
+      <div class="log-block-title">Progress Photo</div>
+      <div class="photo-upload-zone" id="photoZone">
+        <input type="file" accept="image/*" id="photoInput" onchange="handlePhoto(this)">
+        <span class="photo-icon">📷</span>
+        <div class="photo-label">Upload today's photo</div>
+      </div>
+      <img class="photo-preview" id="photoPreview" alt="Today's progress photo">
+    </div>
+
+    <div class="log-block">
+      <div class="log-block-title">Daily Notes</div>
+      <textarea class="log-input" id="inp-notes" placeholder="Energy, soreness, wins, anything..." style="min-height:160px;width:100%;"></textarea>
+    </div>
+  </div>
+
+  <!-- Status + Save -->
+  <div class="status-bar">
+    <div class="complete-toggle" id="dayCompleteToggle">
+      <div class="complete-toggle-check"></div>
+      <div class="complete-label">Day Complete</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="save-confirm" id="saveConfirm">SAVED</span>
+      <button class="save-btn" onclick="saveToday()">Save Entry</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════ CALENDAR ════════════ -->
+<div class="view" id="view-calendar">
+  <div class="section-label">Overview</div>
+  <div class="section-title">Calendar</div>
+
+  <div class="calendar-header">
+    <button class="cal-nav-btn" onclick="calNav(-1)">← Prev</button>
+    <div class="cal-month-label" id="calMonthLabel">—</div>
+    <button class="cal-nav-btn" onclick="calNav(1)">Next →</button>
+  </div>
+
+  <div class="cal-grid" id="calGrid"></div>
+
+  <div style="display:flex;gap:20px;margin-top:16px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--muted);">
+      <div class="status-dot dot-green"></div> Complete
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--muted);">
+      <div class="status-dot dot-yellow"></div> Partial
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--muted);">
+      <div class="status-dot dot-gray"></div> Not started
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ LOG ════════════ -->
+<div class="view" id="view-log">
+  <div class="section-label">History</div>
+  <div class="section-title">Mission Log</div>
+
+  <div class="progress-table-wrap">
+    <table class="progress-table" id="progressTable">
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th>Date</th>
+          <th>Push-ups</th>
+          <th>Pull-ups</th>
+          <th>Squats</th>
+          <th>Sit-ups</th>
+          <th>Food</th>
+          <th>Photo</th>
+          <th>Notes</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="progressTableBody"></tbody>
+    </table>
+  </div>
+  <div class="empty-state" id="logEmptyState">No entries yet. Start logging today.</div>
+</div>
+
+<!-- ════════════ REPORT ════════════ -->
+<div class="view" id="view-report">
+  <div class="section-label">End of Mission</div>
+  <div class="section-title">60-Day Report</div>
+
+  <div class="report-grid">
+    <div class="report-card">
+      <div class="report-num" id="rpt-days">0</div>
+      <div class="report-label">Days Completed</div>
+    </div>
+    <div class="report-card">
+      <div class="report-num" id="rpt-streak">0</div>
+      <div class="report-label">Best Streak</div>
+    </div>
+    <div class="report-card">
+      <div class="report-num" id="rpt-pushups">0</div>
+      <div class="report-label">Total Push-ups</div>
+    </div>
+    <div class="report-card">
+      <div class="report-num" id="rpt-pullups">0</div>
+      <div class="report-label">Total Pull-ups</div>
+    </div>
+    <div class="report-card">
+      <div class="report-num" id="rpt-squats">0</div>
+      <div class="report-label">Total Squats</div>
+    </div>
+    <div class="report-card">
+      <div class="report-num" id="rpt-situps">0</div>
+      <div class="report-label">Total Sit-ups</div>
+    </div>
+  </div>
+
+  <!-- Before / After -->
+  <div class="section-label" style="margin-bottom:8px;">Progress Photos</div>
+  <div class="photo-compare-grid">
+    <div class="photo-compare-slot" id="rptPhotoFirst">
+      <div class="photo-compare-label">Day 1 · Before</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);">No photo logged</div>
+    </div>
+    <div class="photo-compare-slot" id="rptPhotoLast">
+      <div class="photo-compare-label">Latest · After</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted2);">No photo logged</div>
+    </div>
+  </div>
+
+  <!-- Nutrition history -->
+  <div class="section-label" style="margin-bottom:8px;">Nutrition History</div>
+  <div id="rptNutrition" class="empty-state">No nutrition data yet.</div>
+
+  <!-- Journal -->
+  <div class="section-label" style="margin-bottom:8px;margin-top:28px;">Journal Entries</div>
+  <div id="rptJournal"></div>
+  <div class="empty-state" id="rptJournalEmpty">No notes logged yet.</div>
+
+  <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;">
+    <button class="save-btn" onclick="exportReport()">Export as Text</button>
+    <button class="save-btn" style="background:var(--surface);border:1px solid var(--border);" onclick="clearAll()">Clear All Data</button>
+  </div>
+</div>
+
+<!-- ════════════ CALENDAR DAY MODAL ════════════ -->
+<div class="modal-overlay" id="calModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modalDateTitle">—</div>
+      <button class="modal-close" onclick="closeModal()">Close</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+const START_DATE_KEY = 'mission_start_date';
+const MISSION_START = '2026-07-19';
+const LOG_KEY_PREFIX = 'mission_log_';
+
+function getStartDate() {
+  return MISSION_START;
+}
+
+function todayStr() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+function getDayLog(dateStr) {
+  const raw = localStorage.getItem(LOG_KEY_PREFIX + dateStr);
+  return raw ? JSON.parse(raw) : null;
+}
+
+function saveDayLog(dateStr, data) {
+  localStorage.setItem(LOG_KEY_PREFIX + dateStr, JSON.stringify(data));
+}
+
+function getAllLogs() {
+  const logs = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith(LOG_KEY_PREFIX)) {
+      const dateStr = k.replace(LOG_KEY_PREFIX, '');
+      logs.push({ date: dateStr, data: JSON.parse(localStorage.getItem(k)) });
+    }
+  }
+  logs.sort((a, b) => a.date.localeCompare(b.date));
+  return logs;
+}
+
+function getMissionDay(dateStr) {
+  const start = new Date(getStartDate() + 'T00:00:00');
+  const target = new Date(dateStr + 'T00:00:00');
+  const diff = Math.round((target - start) / 86400000) + 1;
+  return diff;
+}
+
+// ══════════════════════════════════════
+// TODAY STATE
+// ══════════════════════════════════════
+let todayChecks = { pushups: false, pullups: false, squats: false, situps: false };
+let dayComplete = false;
+let todayPhotoData = null;
+
+function loadTodayState() {
+  const log = getDayLog(todayStr());
+  if (!log) return;
+  todayChecks = log.checks || todayChecks;
+  dayComplete = log.complete || false;
+  todayPhotoData = log.photo || null;
+
+  // Restore workout checks (merge saved checks including custom)
+  todayChecks = { ...todayChecks, ...(log.checks || {}) };
+  Object.entries(todayChecks).forEach(([key, val]) => {
+    if (val) {
+      const el = document.querySelector(`.workout-item[data-key="${key}"]`);
+      if (el) el.classList.add('checked');
+    }
+  });
+
+  // Restore nutrition
+  ['breakfast','lunch','dinner','snacks','calories','protein','water','notes'].forEach(f => {
+    const el = document.getElementById('inp-' + f);
+    if (el && log[f] !== undefined) el.value = log[f];
+  });
+
+  // Restore day complete
+  if (dayComplete) document.getElementById('dayCompleteToggle').classList.add('done');
+
+  // Restore photo
+  if (todayPhotoData) {
+    const prev = document.getElementById('photoPreview');
+    prev.src = todayPhotoData;
+    prev.style.display = 'block';
+    document.getElementById('photoZone').querySelector('.photo-icon').style.display = 'none';
+    document.getElementById('photoZone').querySelector('.photo-label').style.display = 'none';
+  }
+}
+
+// Workout item toggle
+document.getElementById('workoutChecks').addEventListener('click', function(e) {
+  const item = e.target.closest('.workout-item');
+  if (!item) return;
+  const key = item.dataset.key;
+  todayChecks[key] = !todayChecks[key];
+  item.classList.toggle('checked', todayChecks[key]);
+});
+
+// Day complete toggle
+document.getElementById('dayCompleteToggle').addEventListener('click', function() {
+  dayComplete = !dayComplete;
+  this.classList.toggle('done', dayComplete);
+});
+
+function handlePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    todayPhotoData = e.target.result;
+    const prev = document.getElementById('photoPreview');
+    prev.src = todayPhotoData;
+    prev.style.display = 'block';
+    document.getElementById('photoZone').querySelector('.photo-icon').style.display = 'none';
+    document.getElementById('photoZone').querySelector('.photo-label').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveToday() {
+  const data = {
+    checks: { ...todayChecks },
+    complete: dayComplete,
+    photo: todayPhotoData,
+    breakfast: document.getElementById('inp-breakfast').value,
+    lunch: document.getElementById('inp-lunch').value,
+    dinner: document.getElementById('inp-dinner').value,
+    snacks: document.getElementById('inp-snacks').value,
+    calories: document.getElementById('inp-calories').value,
+    protein: document.getElementById('inp-protein').value,
+    water: document.getElementById('inp-water').value,
+    notes: document.getElementById('inp-notes').value,
+    savedAt: new Date().toISOString()
+  };
+  saveDayLog(todayStr(), data);
+
+  const confirm = document.getElementById('saveConfirm');
+  confirm.classList.add('show');
+  setTimeout(() => confirm.classList.remove('show'), 2000);
+
+  updateStreaks();
+}
+
+// ══════════════════════════════════════
+// STREAKS + HEADER
+// ══════════════════════════════════════
+function updateStreaks() {
+  const logs = getAllLogs();
+  const completed = logs.filter(l => l.data.complete);
+  const totalDone = completed.length;
+
+  // Streak calculation
+  let current = 0, longest = 0, streak = 0;
+  const completedDates = new Set(completed.map(l => l.date));
+  const today = todayStr();
+  let d = new Date(today + 'T00:00:00');
+
+  while (true) {
+    const s = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if (completedDates.has(s)) {
+      current++;
+      d.setDate(d.getDate() - 1);
+    } else break;
+  }
+
+  // Longest streak
+  let tempStreak = 0;
+  let prev = null;
+  completed.forEach(l => {
+    if (!prev) { tempStreak = 1; }
+    else {
+      const prevD = new Date(prev + 'T00:00:00');
+      prevD.setDate(prevD.getDate() + 1);
+      const prevStr = `${prevD.getFullYear()}-${String(prevD.getMonth()+1).padStart(2,'0')}-${String(prevD.getDate()).padStart(2,'0')}`;
+      if (prevStr === l.date) { tempStreak++; }
+      else { tempStreak = 1; }
+    }
+    if (tempStreak > longest) longest = tempStreak;
+    prev = l.date;
+  });
+
+  document.getElementById('streakCurrent').textContent = current;
+  document.getElementById('streakLongest').textContent = longest;
+  document.getElementById('streakDone').textContent = totalDone;
+  document.getElementById('streakLeft').textContent = Math.max(0, 60 - totalDone);
+
+  // Mission day
+  const mDay = getMissionDay(today);
+  const displayDay = Math.max(1, Math.min(mDay, 60));
+  document.getElementById('missionDayBadge').textContent = `DAY ${displayDay} / 60`;
+  document.getElementById('missionProgressBar').style.width = `${(displayDay / 60) * 100}%`;
+}
+
+// ══════════════════════════════════════
+// DATE HEADER
+// ══════════════════════════════════════
+function updateDateHeader() {
+  const now = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('todayDateLabel').textContent =
+    `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+
+}
+
+// ══════════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════════
+let calYear, calMonth;
+
+function initCal() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCal();
+}
+
+function calNav(dir) {
+  calMonth += dir;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCal();
+}
+
+function renderCal() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthLabel').textContent = `${months[calMonth]} ${calYear}`;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // Day labels
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-label';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = todayStr();
+
+  // Empty slots
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const log = getDayLog(dateStr);
+    const mDay = getMissionDay(dateStr);
+    const isMission = mDay >= 1 && mDay <= 60;
+
+    const el = document.createElement('div');
+    el.className = 'cal-day' + (dateStr === today ? ' today' : '');
+    el.innerHTML = `<div class="cal-day-num">${d}</div>`;
+
+    if (isMission) {
+      const mLabel = document.createElement('div');
+      mLabel.className = 'cal-mission-day';
+      mLabel.textContent = `D${mDay}`;
+      el.appendChild(mLabel);
+    }
+
+    if (log) {
+      const dot = document.createElement('div');
+      dot.className = 'cal-status-circle';
+      if (log.complete) {
+        dot.classList.add('dot-green');
+      } else {
+        const anyCheck = log.checks && Object.values(log.checks).some(v => v);
+        dot.classList.add(anyCheck ? 'dot-yellow' : 'dot-gray');
+      }
+      el.appendChild(dot);
+    }
+
+    el.addEventListener('click', () => openDayModal(dateStr));
+    grid.appendChild(el);
+  }
+}
+
+function openDayModal(dateStr) {
+  const log = getDayLog(dateStr);
+  const mDay = getMissionDay(dateStr);
+  document.getElementById('modalDateTitle').textContent =
+    `${dateStr} · Day ${mDay}`;
+
+  const content = document.getElementById('modalContent');
+
+  if (!log) {
+    content.innerHTML = `<div class="empty-state" style="padding:32px 0;">No entry for this day.</div>`;
+  } else {
+    const checkNames = { pushups: 'Push-ups', pullups: 'Pull-ups', squats: 'Squats', situps: 'Sit-ups / L-Sits' };
+    const workoutRows = Object.entries(checkNames).map(([k, label]) => {
+      const done = log.checks?.[k];
+      return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="width:16px;height:16px;background:${done ? 'var(--red)' : 'transparent'};border:1.5px solid ${done ? 'var(--red)' : 'var(--border2)'};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:white;">${done ? '✓' : ''}</div>
+        <div style="font-family:var(--cond);font-size:16px;font-weight:600;">${label}</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto;">${done ? 'DONE' : '—'}</div>
+      </div>`;
+    }).join('');
+
+    const nutLines = ['breakfast','lunch','dinner','snacks','calories','protein','water']
+      .filter(f => log[f])
+      .map(f => `<div style="font-family:var(--mono);font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;gap:12px;"><span style="color:var(--muted);min-width:80px;text-transform:uppercase;">${f}</span><span>${log[f]}</span></div>`)
+      .join('') || '<div style="font-family:var(--mono);font-size:11px;color:var(--muted);">No nutrition logged.</div>';
+
+    const photoHtml = log.photo
+      ? `<img src="${log.photo}" style="width:100%;max-height:200px;object-fit:cover;margin-bottom:12px;">`
+      : `<div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px;">No photo.</div>`;
+
+    const notesHtml = log.notes
+      ? `<div style="font-family:var(--mono);font-size:12px;color:var(--text);white-space:pre-wrap;">${log.notes}</div>`
+      : `<div style="font-family:var(--mono);font-size:11px;color:var(--muted);">No notes.</div>`;
+
+    const statusHtml = `<div style="font-family:var(--mono);font-size:11px;color:${log.complete ? 'var(--green)' : 'var(--yellow)'};letter-spacing:2px;text-transform:uppercase;">${log.complete ? '● COMPLETE' : '● PARTIAL'}</div>`;
+
+    content.innerHTML = `
+      <div class="full-log-block">${statusHtml}</div>
+      <div class="full-log-block">
+        <div class="log-block-title">Workout</div>
+        ${workoutRows}
+      </div>
+      <div class="full-log-block">
+        <div class="log-block-title">Nutrition</div>
+        ${nutLines}
+      </div>
+      <div class="full-log-block">
+        <div class="log-block-title">Photo</div>
+        ${photoHtml}
+      </div>
+      <div class="full-log-block">
+        <div class="log-block-title">Notes</div>
+        ${notesHtml}
+      </div>
+    `;
+  }
+
+  document.getElementById('calModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('calModal').classList.remove('open');
+}
+
+document.getElementById('calModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ══════════════════════════════════════
+// LOG TABLE
+// ══════════════════════════════════════
+function renderLogTable() {
+  const logs = getAllLogs();
+  const tbody = document.getElementById('progressTableBody');
+  tbody.innerHTML = '';
+
+  if (logs.length === 0) {
+    document.getElementById('logEmptyState').style.display = 'block';
+    return;
+  }
+  document.getElementById('logEmptyState').style.display = 'none';
+
+  logs.forEach(({ date, data }) => {
+    const mDay = getMissionDay(date);
+    const c = data.checks || {};
+    const status = data.complete ? 'Complete' : (Object.values(c).some(v=>v) ? 'Partial' : 'Incomplete');
+    const dotClass = data.complete ? 'dot-green' : (Object.values(c).some(v=>v) ? 'dot-yellow' : 'dot-gray');
+    const foodLogged = ['breakfast','lunch','dinner'].some(f => data[f]);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${mDay}</td>
+      <td>${date}</td>
+      <td>${c.pushups ? '✓ 1,000' : '—'}</td>
+      <td>${c.pullups ? '✓ 1,000' : '—'}</td>
+      <td>${c.squats ? '✓ 1,000' : '—'}</td>
+      <td>${c.situps ? '✓ 1,000' : '—'}</td>
+      <td>${foodLogged ? '✓' : '—'}</td>
+      <td>${data.photo ? '✓' : '—'}</td>
+      <td class="td-notes">${data.notes || '—'}</td>
+      <td><span class="status-dot ${dotClass}"></span>${status}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ══════════════════════════════════════
+// REPORT
+// ══════════════════════════════════════
+function renderReport() {
+  const logs = getAllLogs();
+  const completed = logs.filter(l => l.data.complete);
+
+  document.getElementById('rpt-days').textContent = completed.length;
+  document.getElementById('rpt-pushups').textContent = (completed.filter(l => l.data.checks?.pushups).length * 1000).toLocaleString();
+  document.getElementById('rpt-pullups').textContent = (completed.filter(l => l.data.checks?.pullups).length * 1000).toLocaleString();
+  document.getElementById('rpt-squats').textContent = (completed.filter(l => l.data.checks?.squats).length * 1000).toLocaleString();
+  document.getElementById('rpt-situps').textContent = (completed.filter(l => l.data.checks?.situps).length * 1000).toLocaleString();
+
+  // Streak
+  let longest = 0, tempStreak = 0, prev = null;
+  logs.filter(l=>l.data.complete).forEach(l => {
+    if (!prev) { tempStreak = 1; }
+    else {
+      const prevD = new Date(prev + 'T00:00:00');
+      prevD.setDate(prevD.getDate() + 1);
+      const ps = `${prevD.getFullYear()}-${String(prevD.getMonth()+1).padStart(2,'0')}-${String(prevD.getDate()).padStart(2,'0')}`;
+      tempStreak = (ps === l.date) ? tempStreak + 1 : 1;
+    }
+    if (tempStreak > longest) longest = tempStreak;
+    prev = l.date;
+  });
+  document.getElementById('rpt-streak').textContent = longest;
+
+  // Before / After photos
+  const photosLogs = logs.filter(l => l.data.photo);
+  const firstPhoto = document.getElementById('rptPhotoFirst');
+  const lastPhoto = document.getElementById('rptPhotoLast');
+  if (photosLogs.length > 0) {
+    firstPhoto.innerHTML = `<div class="photo-compare-label">Day ${getMissionDay(photosLogs[0].date)} · Before</div><img src="${photosLogs[0].data.photo}" class="photo-compare-img">`;
+    lastPhoto.innerHTML = `<div class="photo-compare-label">Day ${getMissionDay(photosLogs[photosLogs.length-1].date)} · After</div><img src="${photosLogs[photosLogs.length-1].data.photo}" class="photo-compare-img">`;
+  }
+
+  // Nutrition
+  const nutEl = document.getElementById('rptNutrition');
+  const nutLogs = logs.filter(l => l.data.breakfast || l.data.lunch || l.data.dinner);
+  if (nutLogs.length === 0) {
+    nutEl.classList.add('empty-state');
+    nutEl.textContent = 'No nutrition data yet.';
+  } else {
+    nutEl.classList.remove('empty-state');
+    nutEl.innerHTML = nutLogs.map(l => `
+      <div class="full-log-block" style="margin-bottom:2px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;">Day ${getMissionDay(l.date)} · ${l.date}</div>
+        ${['breakfast','lunch','dinner','snacks'].filter(f=>l.data[f]).map(f=>`
+          <div style="font-family:var(--mono);font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;gap:12px;">
+            <span style="color:var(--muted);min-width:80px;text-transform:uppercase;">${f}</span>
+            <span>${l.data[f]}</span>
+          </div>`).join('')}
+        ${l.data.calories ? `<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px;">Cal: ${l.data.calories} · Protein: ${l.data.protein||'—'}g · Water: ${l.data.water||'—'}</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  // Journal
+  const journalEl = document.getElementById('rptJournal');
+  const journalEmpty = document.getElementById('rptJournalEmpty');
+  const noteLogs = logs.filter(l => l.data.notes);
+  if (noteLogs.length === 0) {
+    journalEl.innerHTML = '';
+    journalEmpty.style.display = 'block';
+  } else {
+    journalEmpty.style.display = 'none';
+    journalEl.innerHTML = noteLogs.map(l => `
+      <div class="full-log-block" style="margin-bottom:2px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">Day ${getMissionDay(l.date)} · ${l.date}</div>
+        <div style="font-family:var(--mono);font-size:12px;white-space:pre-wrap;color:var(--text);">${l.data.notes}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// ══════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════
+function exportReport() {
+  const logs = getAllLogs();
+  let out = '60-DAY MISSION LOG — EXPORT\n';
+  out += '='.repeat(40) + '\n\n';
+  logs.forEach(({ date, data }) => {
+    const mDay = getMissionDay(date);
+    out += `DAY ${mDay} · ${date}\n`;
+    out += '-'.repeat(30) + '\n';
+    const c = data.checks || {};
+    out += `Push-ups: ${c.pushups ? '✓' : '—'} | Pull-ups: ${c.pullups ? '✓' : '—'} | Squats: ${c.squats ? '✓' : '—'} | Sit-ups: ${c.situps ? '✓' : '—'}\n`;
+    if (data.breakfast) out += `Breakfast: ${data.breakfast}\n`;
+    if (data.lunch) out += `Lunch: ${data.lunch}\n`;
+    if (data.dinner) out += `Dinner: ${data.dinner}\n`;
+    if (data.calories) out += `Cal: ${data.calories} | Protein: ${data.protein||'—'}g | Water: ${data.water||'—'}\n`;
+    if (data.notes) out += `Notes: ${data.notes}\n`;
+    out += `Status: ${data.complete ? 'COMPLETE' : 'PARTIAL/INCOMPLETE'}\n\n`;
+  });
+  const blob = new Blob([out], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mission-log-export.txt';
+  a.click();
+}
+
+function clearAll() {
+  if (!confirm('Clear all mission data? This cannot be undone.')) return;
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith(LOG_KEY_PREFIX) || k === START_DATE_KEY) keys.push(k);
+  }
+  keys.forEach(k => localStorage.removeItem(k));
+  location.reload();
+}
+
+// ══════════════════════════════════════
+// NAV TABS
+// ══════════════════════════════════════
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('view-' + this.dataset.view).classList.add('active');
+
+    if (this.dataset.view === 'calendar') { initCal(); }
+    if (this.dataset.view === 'log') { renderLogTable(); }
+    if (this.dataset.view === 'report') { renderReport(); }
+  });
+});
+
+
+// ══════════════════════════════════════
+// CUSTOM WORKOUTS
+// ══════════════════════════════════════
+const CUSTOM_WORKOUTS_KEY = 'mission_custom_workouts';
+
+function getCustomWorkouts() {
+  const raw = localStorage.getItem(CUSTOM_WORKOUTS_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+function saveCustomWorkouts(list) {
+  localStorage.setItem(CUSTOM_WORKOUTS_KEY, JSON.stringify(list));
+}
+
+function addCustomWorkout() {
+  const input = document.getElementById('newWorkoutName');
+  const name = input.value.trim();
+  if (!name) return;
+  const list = getCustomWorkouts();
+  const key = 'custom_' + Date.now();
+  list.push({ key, name });
+  saveCustomWorkouts(list);
+  input.value = '';
+  renderCustomWorkouts();
+}
+
+function removeCustomWorkout(key) {
+  const list = getCustomWorkouts().filter(w => w.key !== key);
+  saveCustomWorkouts(list);
+  delete todayChecks[key];
+  renderCustomWorkouts();
+}
+
+function renderCustomWorkouts() {
+  const container = document.getElementById('customWorkouts');
+  if (!container) return;
+  const list = getCustomWorkouts();
+  container.innerHTML = list.map(w => `
+    <div class="workout-item ${todayChecks[w.key] ? 'checked' : ''}" data-key="${w.key}" style="position:relative;">
+      <div class="custom-check">${todayChecks[w.key] ? '' : ''}</div>
+      <div class="workout-name">${w.name}</div>
+      <button onclick="event.stopPropagation();removeCustomWorkout('${w.key}')" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:4px 8px;margin-left:auto;" title="Remove">×</button>
+    </div>
+  `).join('');
+
+  // Re-attach click handlers
+  container.querySelectorAll('.workout-item').forEach(item => {
+    item.addEventListener('click', function() {
+      const key = this.dataset.key;
+      todayChecks[key] = !todayChecks[key];
+      this.classList.toggle('checked', todayChecks[key]);
+      // Fix checkmark display
+      const chk = this.querySelector('.custom-check');
+      if (todayChecks[key]) {
+        chk.style.background = 'var(--red)';
+        chk.style.borderColor = 'var(--red)';
+      } else {
+        chk.style.background = 'transparent';
+        chk.style.borderColor = '';
+      }
+    });
+  });
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+updateDateHeader();
+renderCustomWorkouts();
+
+loadTodayState();
+updateStreaks();
+</script>
+</body>
+</html>
