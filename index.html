@@ -290,6 +290,47 @@ body {
   font-size: 12px;
   color: var(--red);
 }
+.workout-inputs {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.rep-input {
+  width: 70px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 5px 8px;
+  outline: none;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.rep-input::-webkit-outer-spin-button,
+.rep-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.rep-input:focus { border-color: var(--red); }
+
+.time-input {
+  width: 72px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 5px 8px;
+  outline: none;
+  text-align: center;
+}
+
+.time-input:focus { border-color: var(--red); }
+
+.workout-item.checked .rep-input { color: var(--muted); }
+
 
 /* ── NUTRITION INPUTS ── */
 .nut-row {
@@ -837,22 +878,34 @@ textarea.log-input { min-height: 80px; }
         <div class="workout-item" data-key="pushups">
           <div class="custom-check"></div>
           <div class="workout-name">Push-ups</div>
-          <div class="workout-reps">1,000</div>
+          <div class="workout-inputs">
+            <input type="number" class="rep-input" data-field="pushups_reps" placeholder="reps" min="0">
+            <input type="text" class="time-input" data-field="pushups_time" placeholder="time">
+          </div>
         </div>
         <div class="workout-item" data-key="pullups">
           <div class="custom-check"></div>
           <div class="workout-name">Pull-ups</div>
-          <div class="workout-reps">1,000</div>
+          <div class="workout-inputs">
+            <input type="number" class="rep-input" data-field="pullups_reps" placeholder="reps" min="0">
+            <input type="text" class="time-input" data-field="pullups_time" placeholder="time">
+          </div>
         </div>
         <div class="workout-item" data-key="squats">
           <div class="custom-check"></div>
           <div class="workout-name">Squats</div>
-          <div class="workout-reps">1,000</div>
+          <div class="workout-inputs">
+            <input type="number" class="rep-input" data-field="squats_reps" placeholder="reps" min="0">
+            <input type="text" class="time-input" data-field="squats_time" placeholder="time">
+          </div>
         </div>
         <div class="workout-item" data-key="situps">
           <div class="custom-check"></div>
           <div class="workout-name">Sit-ups / L-Sits</div>
-          <div class="workout-reps">1,000</div>
+          <div class="workout-inputs">
+            <input type="number" class="rep-input" data-field="situps_reps" placeholder="reps" min="0">
+            <input type="text" class="time-input" data-field="situps_time" placeholder="time">
+          </div>
         </div>
       </div>
       <!-- Add Workout -->
@@ -1169,6 +1222,14 @@ async function loadTodayState() {
     document.getElementById('photoZone').querySelector('.photo-icon').style.display = 'none';
     document.getElementById('photoZone').querySelector('.photo-label').style.display = 'none';
   }
+
+  // Restore rep + time fields
+  if (log.workoutDetails) {
+    Object.entries(log.workoutDetails).forEach(([field, val]) => {
+      const el = document.querySelector(`[data-field="${field}"]`);
+      if (el) el.value = val;
+    });
+  }
 }
 
 // Workout item toggle
@@ -1224,8 +1285,15 @@ async function handlePhoto(input) {
 }
 
 async function saveToday() {
+  // Collect rep + time fields
+  const workoutDetails = {};
+  document.querySelectorAll('.rep-input, .time-input').forEach(inp => {
+    if (inp.value) workoutDetails[inp.dataset.field] = inp.value;
+  });
+
   const data = {
     checks: { ...todayChecks },
+    workoutDetails,
     complete: dayComplete,
     photo: todayPhotoData,
     breakfast: document.getElementById('inp-breakfast').value,
@@ -1481,10 +1549,10 @@ function renderLogTable() {
     tr.innerHTML = `
       <td>${mDay}</td>
       <td>${date}</td>
-      <td>${c.pushups ? '✓ 1,000' : '—'}</td>
-      <td>${c.pullups ? '✓ 1,000' : '—'}</td>
-      <td>${c.squats ? '✓ 1,000' : '—'}</td>
-      <td>${c.situps ? '✓ 1,000' : '—'}</td>
+      <td>${c.pushups ? (data.workoutDetails?.pushups_reps || '✓') + (data.workoutDetails?.pushups_time ? ' · ' + data.workoutDetails.pushups_time : '') : '—'}</td>
+      <td>${c.pullups ? (data.workoutDetails?.pullups_reps || '✓') + (data.workoutDetails?.pullups_time ? ' · ' + data.workoutDetails.pullups_time : '') : '—'}</td>
+      <td>${c.squats ? (data.workoutDetails?.squats_reps || '✓') + (data.workoutDetails?.squats_time ? ' · ' + data.workoutDetails.squats_time : '') : '—'}</td>
+      <td>${c.situps ? (data.workoutDetails?.situps_reps || '✓') + (data.workoutDetails?.situps_time ? ' · ' + data.workoutDetails.situps_time : '') : '—'}</td>
       <td>${foodLogged ? '✓' : '—'}</td>
       <td>${data.photo ? '✓' : '—'}</td>
       <td class="td-notes">${data.notes || '—'}</td>
@@ -1502,10 +1570,10 @@ function renderReport() {
   const completed = logs.filter(l => l.data.complete);
 
   document.getElementById('rpt-days').textContent = completed.length;
-  document.getElementById('rpt-pushups').textContent = (completed.filter(l => l.data.checks?.pushups).length * 1000).toLocaleString();
-  document.getElementById('rpt-pullups').textContent = (completed.filter(l => l.data.checks?.pullups).length * 1000).toLocaleString();
-  document.getElementById('rpt-squats').textContent = (completed.filter(l => l.data.checks?.squats).length * 1000).toLocaleString();
-  document.getElementById('rpt-situps').textContent = (completed.filter(l => l.data.checks?.situps).length * 1000).toLocaleString();
+  document.getElementById('rpt-pushups').textContent = logs.filter(l=>l.data.checks?.pushups).reduce((s,l)=>s+parseInt(l.data.workoutDetails?.pushups_reps||0),0).toLocaleString();
+  document.getElementById('rpt-pullups').textContent = logs.filter(l=>l.data.checks?.pullups).reduce((s,l)=>s+parseInt(l.data.workoutDetails?.pullups_reps||0),0).toLocaleString();
+  document.getElementById('rpt-squats').textContent = logs.filter(l=>l.data.checks?.squats).reduce((s,l)=>s+parseInt(l.data.workoutDetails?.squats_reps||0),0).toLocaleString();
+  document.getElementById('rpt-situps').textContent = logs.filter(l=>l.data.checks?.situps).reduce((s,l)=>s+parseInt(l.data.workoutDetails?.situps_reps||0),0).toLocaleString();
 
   // Streak
   let longest = 0, tempStreak = 0, prev = null;
