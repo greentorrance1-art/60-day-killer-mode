@@ -1076,13 +1076,37 @@ function todayStr() {
   return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
 }
 
-function getDayLog(dateStr) {
+async function getDayLog(dateStr) {
+  // Try Firestore first
+  if (window._firebaseReady) {
+    try {
+      const snap = await window._getDoc(window._doc(window._db, 'logs', dateStr));
+      if (snap.exists()) {
+        // Sync back to localStorage
+        localStorage.setItem(LOG_KEY_PREFIX + dateStr, JSON.stringify(snap.data()));
+        return snap.data();
+      }
+    } catch(e) {
+      console.error('Firestore read failed, using localStorage:', e);
+    }
+  }
+  // Fall back to localStorage
   const raw = localStorage.getItem(LOG_KEY_PREFIX + dateStr);
   return raw ? JSON.parse(raw) : null;
 }
 
-function saveDayLog(dateStr, data) {
+async function saveDayLog(dateStr, data) {
+  // Always save to localStorage first (instant, offline)
   localStorage.setItem(LOG_KEY_PREFIX + dateStr, JSON.stringify(data));
+  // Also save to Firestore if connected
+  if (window._firebaseReady) {
+    try {
+      await window._setDoc(window._doc(window._db, 'logs', dateStr), data);
+      console.log('Saved to Firestore:', dateStr);
+    } catch(e) {
+      console.error('Firestore save failed:', e);
+    }
+  }
 }
 
 function getAllLogs() {
@@ -1112,8 +1136,8 @@ let todayChecks = { pushups: false, pullups: false, squats: false, situps: false
 let dayComplete = false;
 let todayPhotoData = null;
 
-function loadTodayState() {
-  const log = getDayLog(todayStr());
+async function loadTodayState() {
+  const log = await getDayLog(todayStr());
   if (!log) return;
   todayChecks = log.checks || todayChecks;
   dayComplete = log.complete || false;
@@ -1162,22 +1186,44 @@ document.getElementById('dayCompleteToggle').addEventListener('click', function(
   this.classList.toggle('done', dayComplete);
 });
 
-function handlePhoto(input) {
+async function handlePhoto(input) {
   const file = input.files[0];
   if (!file) return;
+
+  // Show local preview immediately
   const reader = new FileReader();
   reader.onload = function(e) {
-    todayPhotoData = e.target.result;
     const prev = document.getElementById('photoPreview');
-    prev.src = todayPhotoData;
+    prev.src = e.target.result;
     prev.style.display = 'block';
     document.getElementById('photoZone').querySelector('.photo-icon').style.display = 'none';
     document.getElementById('photoZone').querySelector('.photo-label').style.display = 'none';
   };
   reader.readAsDataURL(file);
+
+  // Upload to Firebase Storage if ready
+  if (window._firebaseReady) {
+    try {
+      const storageRef = window._ref(window._storage, 'photos/' + todayStr() + '.jpg');
+      await window._uploadBytes(storageRef, file);
+      todayPhotoData = await window._getDownloadURL(storageRef);
+      console.log('Photo uploaded:', todayPhotoData);
+    } catch(e) {
+      console.error('Photo upload failed, using local fallback:', e);
+      // Fall back to base64
+      const r2 = new FileReader();
+      r2.onload = ev => { todayPhotoData = ev.target.result; };
+      r2.readAsDataURL(file);
+    }
+  } else {
+    // No Firebase yet, use base64
+    const r2 = new FileReader();
+    r2.onload = ev => { todayPhotoData = ev.target.result; };
+    r2.readAsDataURL(file);
+  }
 }
 
-function saveToday() {
+async function saveToday() {
   const data = {
     checks: { ...todayChecks },
     complete: dayComplete,
@@ -1192,7 +1238,7 @@ function saveToday() {
     notes: document.getElementById('inp-notes').value,
     savedAt: new Date().toISOString()
   };
-  saveDayLog(todayStr(), data);
+  await saveDayLog(todayStr(), data);
 
   const confirm = document.getElementById('saveConfirm');
   confirm.classList.add('show');
@@ -1649,8 +1695,42 @@ function renderCustomWorkouts() {
 updateDateHeader();
 renderCustomWorkouts();
 
-loadTodayState();
+loadTodayState();  // async, runs after Firebase ready
 updateStreaks();
 </script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB4CdWIHpfT6zO73jwMyg3yb8oVSydemoY",
+    authDomain: "day-cb1e4.firebaseapp.com",
+    projectId: "day-cb1e4",
+    storageBucket: "day-cb1e4.firebasestorage.app",
+    messagingSenderId: "175745932372",
+    appId: "1:175745932372:web:7d052139a170f6b8b321c1"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  window._db = db;
+  window._storage = storage;
+  window._ref = ref;
+  window._uploadBytes = uploadBytes;
+  window._getDownloadURL = getDownloadURL;
+  window._doc = doc;
+  window._setDoc = setDoc;
+  window._getDoc = getDoc;
+  window._collection = collection;
+  window._getDocs = getDocs;
+  window._firebaseReady = true;
+
+  console.log('Firebase connected.');
+</script>
+
 </body>
 </html>
