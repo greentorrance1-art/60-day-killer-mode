@@ -770,6 +770,139 @@ body {
 
 .modal-close:hover { border-color: var(--red); color: var(--text); }
 
+
+/* ── SUPPLEMENT BUTTONS ── */
+.supp-section { margin-bottom: 20px; }
+
+.supp-section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold, #c9a84c);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.supp-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.supp-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.supp-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  padding: 6px 10px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.supp-pill:hover { border-color: var(--red); color: var(--text); }
+
+.supp-pill.checked {
+  background: rgba(192,57,43,0.15);
+  border-color: var(--red);
+  color: var(--text);
+}
+
+.supp-pill.checked::before {
+  content: '✓';
+  color: var(--red);
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.supp-pill-remove {
+  background: none;
+  border: none;
+  color: var(--muted2);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 0 0 4px;
+  line-height: 1;
+  display: none;
+}
+
+.supp-pill:hover .supp-pill-remove { display: inline; }
+.supp-pill-remove:hover { color: var(--red); }
+
+.supp-add-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.supp-add-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 6px 10px;
+  outline: none;
+}
+
+.supp-add-input:focus { border-color: var(--red); }
+
+.supp-add-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.supp-add-btn:hover { border-color: var(--red); color: var(--text); }
+
+.daily-targets {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  padding: 12px 16px;
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.target-item {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.target-item strong {
+  display: block;
+  color: var(--red);
+  font-size: 13px;
+  font-family: var(--cond);
+  font-weight: 700;
+}
+
 /* ── MISC ── */
 .full-log-block {
   background: var(--surface);
@@ -922,36 +1055,80 @@ textarea.log-input { min-height: 80px; }
     <div class="log-block">
       <div class="log-block-title">Nutrition</div>
 
-      <div class="nut-row">
-        <div class="nut-label">Breakfast</div>
-        <textarea class="log-input" id="inp-breakfast" rows="2" placeholder="What you ate..."></textarea>
-      </div>
-      <div class="nut-row">
-        <div class="nut-label">Lunch</div>
-        <textarea class="log-input" id="inp-lunch" rows="2" placeholder="What you ate..."></textarea>
-      </div>
-      <div class="nut-row">
-        <div class="nut-label">Dinner</div>
-        <textarea class="log-input" id="inp-dinner" rows="2" placeholder="What you ate..."></textarea>
-      </div>
-      <div class="nut-row">
-        <div class="nut-label">Snacks</div>
-        <textarea class="log-input" id="inp-snacks" rows="1" placeholder="Optional..."></textarea>
+      <!-- WAKE UP SUPPS -->
+      <div class="supp-section">
+        <div class="supp-section-label">Wake Up</div>
+        <div class="supp-pills" id="supp-wakeup"></div>
+        <div class="supp-add-row">
+          <input type="text" class="supp-add-input" id="supp-wakeup-input" placeholder="Add supplement...">
+          <button class="supp-add-btn" onclick="addSupp('wakeup')">+ Add</button>
+        </div>
       </div>
 
+      <!-- MEAL 1 -->
+      <div class="supp-section">
+        <div class="supp-section-label">Meal 1 — Mass Shake</div>
+        <textarea class="log-input" id="inp-meal1" rows="2" placeholder="120g oats, 400ml whole milk, 1-2 scoops Mutant Mass, banana, 2 tbsp PB, honey..."></textarea>
+      </div>
+
+      <!-- MEAL 2 -->
+      <div class="supp-section">
+        <div class="supp-section-label">Meal 2 — Main Meal</div>
+        <textarea class="log-input" id="inp-meal2" rows="2" placeholder="Protein source + 2-3 cups rice or potatoes + vegetables..."></textarea>
+      </div>
+
+      <!-- PRE WORKOUT SUPPS -->
+      <div class="supp-section">
+        <div class="supp-section-label">Pre Workout</div>
+        <div class="supp-pills" id="supp-preworkout"></div>
+        <div class="supp-add-row">
+          <input type="text" class="supp-add-input" id="supp-preworkout-input" placeholder="Add supplement...">
+          <button class="supp-add-btn" onclick="addSupp('preworkout')">+ Add</button>
+        </div>
+      </div>
+
+      <!-- MEAL 3 -->
+      <div class="supp-section">
+        <div class="supp-section-label">Meal 3 — Post Workout</div>
+        <textarea class="log-input" id="inp-meal3" rows="2" placeholder="Protein source + rice or sweet potato + vegetables..."></textarea>
+      </div>
+
+      <!-- BEFORE BED SUPPS -->
+      <div class="supp-section">
+        <div class="supp-section-label">Before Bed</div>
+        <div class="supp-pills" id="supp-bed"></div>
+        <div class="supp-add-row">
+          <input type="text" class="supp-add-input" id="supp-bed-input" placeholder="Add supplement...">
+          <button class="supp-add-btn" onclick="addSupp('bed')">+ Add</button>
+        </div>
+        <div style="margin-top:10px;">
+          <textarea class="log-input" id="inp-bedshake" rows="1" placeholder="Mass shake: same as Meal 1..."></textarea>
+        </div>
+      </div>
+
+      <!-- MACROS -->
       <div class="macros-row">
         <div class="macro-input-wrap">
           <div class="macro-input-label">Calories</div>
           <input type="number" class="log-input" id="inp-calories" placeholder="kcal" style="min-height:auto;resize:none;">
         </div>
         <div class="macro-input-wrap">
-          <div class="macro-input-label">Protein</div>
-          <input type="number" class="log-input" id="inp-protein" placeholder="grams" style="min-height:auto;resize:none;">
+          <div class="macro-input-label">Protein (g)</div>
+          <input type="number" class="log-input" id="inp-protein" placeholder="180-250g" style="min-height:auto;resize:none;">
         </div>
         <div class="macro-input-wrap">
           <div class="macro-input-label">Water</div>
           <input type="text" class="log-input" id="inp-water" placeholder="oz / L" style="min-height:auto;resize:none;">
         </div>
+      </div>
+
+      <!-- DAILY TARGETS -->
+      <div class="daily-targets">
+        <div class="target-item"><strong>3,400–3,600</strong>Calories</div>
+        <div class="target-item"><strong>180–250g</strong>Protein</div>
+        <div class="target-item"><strong>400g+</strong>Carbs</div>
+        <div class="target-item"><strong>80–100g</strong>Fat</div>
+        <div class="target-item"><strong>25–40g</strong>Fiber</div>
       </div>
     </div>
   </div>
@@ -1206,10 +1383,16 @@ async function loadTodayState() {
   });
 
   // Restore nutrition
-  ['breakfast','lunch','dinner','snacks','calories','protein','water','notes'].forEach(f => {
+  ['meal1','meal2','meal3','bedshake','calories','protein','water','notes'].forEach(f => {
     const el = document.getElementById('inp-' + f);
     if (el && log[f] !== undefined) el.value = log[f];
   });
+
+  // Restore supp checks
+  if (log.suppChecks) {
+    localStorage.setItem(SUPP_CHECKS_KEY_PREFIX + todayStr(), JSON.stringify(log.suppChecks));
+    renderAllSupps();
+  }
 
   // Restore day complete
   if (dayComplete) document.getElementById('dayCompleteToggle').classList.add('done');
@@ -1285,6 +1468,9 @@ async function handlePhoto(input) {
 }
 
 async function saveToday() {
+  // Save supp checks into data
+  const suppChecks = getTodaySuppChecks();
+
   // Collect rep + time fields
   const workoutDetails = {};
   document.querySelectorAll('.rep-input, .time-input').forEach(inp => {
@@ -1294,12 +1480,13 @@ async function saveToday() {
   const data = {
     checks: { ...todayChecks },
     workoutDetails,
+    suppChecks,
     complete: dayComplete,
     photo: todayPhotoData,
-    breakfast: document.getElementById('inp-breakfast').value,
-    lunch: document.getElementById('inp-lunch').value,
-    dinner: document.getElementById('inp-dinner').value,
-    snacks: document.getElementById('inp-snacks').value,
+    meal1: document.getElementById('inp-meal1').value,
+    meal2: document.getElementById('inp-meal2').value,
+    meal3: document.getElementById('inp-meal3').value,
+    bedshake: document.getElementById('inp-bedshake').value,
     calories: document.getElementById('inp-calories').value,
     protein: document.getElementById('inp-protein').value,
     water: document.getElementById('inp-water').value,
@@ -1693,6 +1880,95 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
 });
 
 
+
+// ══════════════════════════════════════
+// SUPPLEMENTS
+// ══════════════════════════════════════
+const SUPP_DEFAULTS = {
+  wakeup: ['Water 16-20oz', 'Creatine 5g', 'Beet Root Powder', 'D3+K2 w/ Black Seed Oil', 'Fish Oil', 'Shilajit Blend', 'Burdock Root'],
+  preworkout: ['Gorilla Mode HydroPrime', 'Ashwagandha'],
+  bed: ['Magnesium Glycinate', 'Ashwagandha']
+};
+
+const SUPP_LIST_KEY = 'mission_supp_lists';
+const SUPP_CHECKS_KEY_PREFIX = 'mission_supp_checks_';
+
+function getSuppLists() {
+  const raw = localStorage.getItem(SUPP_LIST_KEY);
+  return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(SUPP_DEFAULTS));
+}
+
+function saveSuppLists(lists) {
+  localStorage.setItem(SUPP_LIST_KEY, JSON.stringify(lists));
+}
+
+function getTodaySuppChecks() {
+  const raw = localStorage.getItem(SUPP_CHECKS_KEY_PREFIX + todayStr());
+  return raw ? JSON.parse(raw) : {};
+}
+
+function saveTodaySuppChecks(checks) {
+  localStorage.setItem(SUPP_CHECKS_KEY_PREFIX + todayStr(), JSON.stringify(checks));
+}
+
+function renderSupps(group) {
+  const lists = getSuppLists();
+  const checks = getTodaySuppChecks();
+  const container = document.getElementById('supp-' + group);
+  if (!container) return;
+
+  container.innerHTML = lists[group].map((name, idx) => {
+    const key = group + '_' + idx;
+    const checked = checks[key] || false;
+    return `<div class="supp-pill ${checked ? 'checked' : ''}" onclick="toggleSupp('${group}', ${idx})" data-group="${group}" data-idx="${idx}">
+      <span>${name}</span>
+      <button class="supp-pill-remove" onclick="event.stopPropagation();removeSupp('${group}',${idx})" title="Remove">×</button>
+    </div>`;
+  }).join('');
+}
+
+function renderAllSupps() {
+  ['wakeup','preworkout','bed'].forEach(g => renderSupps(g));
+}
+
+function toggleSupp(group, idx) {
+  const checks = getTodaySuppChecks();
+  const key = group + '_' + idx;
+  checks[key] = !checks[key];
+  saveTodaySuppChecks(checks);
+  renderSupps(group);
+}
+
+function addSupp(group) {
+  const input = document.getElementById('supp-' + group + '-input');
+  const name = input.value.trim();
+  if (!name) return;
+  const lists = getSuppLists();
+  lists[group].push(name);
+  saveSuppLists(lists);
+  input.value = '';
+  renderSupps(group);
+}
+
+function removeSupp(group, idx) {
+  const lists = getSuppLists();
+  // Also clear check for this item
+  const checks = getTodaySuppChecks();
+  delete checks[group + '_' + idx];
+  // Re-index remaining checks
+  const newChecks = {};
+  Object.entries(checks).forEach(([k, v]) => {
+    const [g, i] = k.split('_');
+    const iNum = parseInt(i);
+    if (g === group && iNum > idx) newChecks[g + '_' + (iNum-1)] = v;
+    else if (g !== group || iNum !== idx) newChecks[k] = v;
+  });
+  saveTodaySuppChecks(newChecks);
+  lists[group].splice(idx, 1);
+  saveSuppLists(lists);
+  renderSupps(group);
+}
+
 // ══════════════════════════════════════
 // CUSTOM WORKOUTS
 // ══════════════════════════════════════
@@ -1717,6 +1993,7 @@ function addCustomWorkout() {
   saveCustomWorkouts(list);
   input.value = '';
   renderCustomWorkouts();
+renderAllSupps();
 }
 
 function removeCustomWorkout(key) {
@@ -1724,6 +2001,7 @@ function removeCustomWorkout(key) {
   saveCustomWorkouts(list);
   delete todayChecks[key];
   renderCustomWorkouts();
+renderAllSupps();
 }
 
 function renderCustomWorkouts() {
@@ -1762,6 +2040,7 @@ function renderCustomWorkouts() {
 // ══════════════════════════════════════
 updateDateHeader();
 renderCustomWorkouts();
+renderAllSupps();
 
 loadTodayState();  // async, runs after Firebase ready
 updateStreaks();
